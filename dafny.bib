@@ -685,7 +685,7 @@ Xisbn="978-3-031-27534-0"
     year = 2024 
 }
 
-@inproceedings{dafnydala2024,
+@inproceedings{dafnydala-ftfjp2024,
 author = {Noble, James and Mackay, Julian and Wrigstad, Tobias and Fawcet, Andrew and Homer, Michael},
 title = {Dafny vs. Dala: Experience with Mechanising Language Design},
 year = {2024},
@@ -852,3 +852,136 @@ Xaddress = {USA}
   doi          = {10.1145/2815400.2815428}
 }
 
+@article{linear-dafny-oopsla2022,
+author = {Li, Jialin and Lattuada, Andrea and Zhou, Yi and Cameron, Jonathan and Howell, Jon and Parno, Bryan and Hawblitzel, Chris},
+title = {Linear types for large-scale systems verification},
+year = {2022},
+Xissue_date = {April 2022},
+Xpublisher = {Association for Computing Machinery},
+Xaddress = {New York, NY, USA},
+Xvolume = {6},
+Xnumber = {OOPSLA1},
+Xurl = {https://doi.org/10.1145/3527313},
+doi = {10.1145/3527313},
+Xabstract = {Reasoning about memory aliasing and mutation in software verification is a hard problem. This is especially true for systems using SMT-based automated theorem provers. Memory reasoning in SMT verification typically requires a nontrivial amount of manual effort to specify heap invariants, as well as extensive alias reasoning from the SMT solver. In this paper, we present a hybrid approach that combines linear types with SMT-based verification for memory reasoning. We integrate linear types into Dafny, a verification language with an SMT backend, and show that the two approaches complement each other. By separating memory reasoning from verification conditions, linear types reduce the SMT solving time. At the same time, the expressiveness of SMT queries extends the flexibility of the linear type system. In particular, it allows our linear type system to easily and correctly mix linear and nonlinear data in novel ways, encapsulating linear data inside nonlinear data and vice-versa. We formalize the core of our extensions, prove soundness, and provide algorithms for linear type checking. We evaluate our approach by converting the implementation of a verified storage system (about 24K lines of code and proof) written in Dafny, to use our extended Dafny. The resulting system uses linear types for 91\% of the code and SMT-based heap reasoning for the remaining 9\%. We show that the converted system has 28\% fewer lines of proofs and 30\% shorter verification time overall. We discuss the development overhead in the original system due to SMT-based heap reasoning and highlight the improved developer experience when using linear types.},
+journal = {{OOPSLA}},
+Xjournal = {Proc. ACM Program. Lang.},
+month = apr,
+articleno = {69},
+numpages = {28},
+Xkeywords = {linear types, systems verification}
+}
+
+
+
+@Inbook{strachey-varieties-book1997,
+author="Strachey, Christopher",
+editor="O'Hearn, Peter W.
+and Tennent, Robert D.",
+title="The Varieties of Programming Language",
+bookTitle="Algol-like Languages",
+year="1997",
+Xpublisher="Birkh{\"a}user Boston",
+Xaddress="Boston, MA",
+pages="51--64",
+Xabstract="This paper suggests an analysis of the domains used in programming languages. It identifies some of the characteristic domains and shows that programming languages vary widely in their definition of these domains.",
+Xisbn="978-1-4612-4118-8",
+doi="10.1007/978-1-4612-4118-8_3",
+Xurl="https://doi.org/10.1007/978-1-4612-4118-8_3"
+}
+
+
+@article{hoare-wirth-axiomatic-actainformatica1973,
+	title = {An axiomatic definition of the programming language {PASCAL}},
+	volume = {2},
+	issn = {1432-0525},
+	xurl = {https://doi.org/10.1007/BF00289504},
+	doi = {10.1007/BF00289504},
+	xabstract = {The axiomatic definition method proposed in reference [5] is extended and applied to define the meaning of the programming language PASCAL [1]. The whole language is covered with the exception of real arithmetic and go to statements.},
+	number = {4},
+	journal = {Acta Informatica},
+	author = {Hoare, C. A. R. and Wirth, N.},
+	month = dec,
+	year = {1973},
+	pages = {335--355},
+}
+
+@article{wirth-pascal-1971,
+        Author = {Wirth, N.},
+        Journal = {Acta Informatica},
+        Number = {1},
+        Title = {The Programming Language {PASCAL}},
+        Volume = {1},
+        Year = {1971}}
+
+@inproceedings{wirth-pldesign-ifip1974,
+  author       = {Niklaus Wirth},
+  title        = {On the Design of Programming Languages},
+  booktitle    = {{IFIP} Congress},
+  pages        = {386--393},
+  publisher    = {North-Holland},
+  year         = {1974}
+}
+
+
+@Inbook{specsharp-laser2010,
+author="Leino, K. Rustan M. and M{\"u}ller, Peter",
+title="Using the Spec{\#} Language, Methodology, and Tools to Write Bug-Free Programs",
+bookTitle="{LASER} Summer School",
+year="2010",
+pages="91--139",
+doi="10.1007/978-3-642-13010-6_4"
+}
+
+@article{verification-oo-invariants-jot2004,
+  author = {<a href="/contents.php?query=Barnett">Mike Barnett</a> and <a href="/contents.php?query=DeLine">Robert DeLine</a> and <a href="/contents.php?query=F\"{a}hndrich">Manuel F\"{a}hndrich</a> and <a href="/contents.php?query=Leino">K. Rustan M. Leino</a> and <a href="/contents.php?query=Schulte">Wolfram Schulte</a>},
+  title = {Verification of Object-Oriented Programs with Invariants},
+  journal = {Journal of Object Technology},
+  volume = {3},
+  number = {6},
+  issn = {1660-1769},
+  year = {2004},
+  month = jun,
+  editor = {<a href="/contents.php?query=Eisenbach">Susan Eisenbach</a> and <a href="/contents.php?query=M\"{u}ller">Peter M\"{u}ller</a> and <a href="/contents.php?query=Poetzsch-Heffter">Arnd Poetzsch-Heffter</a>},
+  note = {Workshop on Formal Techniques for Java-like Programs (FTfJP), ECOOP 2003},
+  pages = {27-56},
+  doi = {10.5381/jot.2004.3.6.a2},
+  url = {http://www.jot.fm/contents/issue_2004_06/article2.html}
+}
+
+
+@article{dynamic-frames-fac2011,
+  author       = {Ioannis T. Kassios},
+  title        = {The dynamic frames theory},
+  journal      = {{Formal Aspects of Computing}},
+  volume       = {23},
+  number       = {3},
+  pages        = {267--288},
+  year         = {2011}
+}
+
+@inproceedings{dynamic-frames-fm2006,
+  author       = {Ioannis T. Kassios},
+  title        = {Dynamic Frames: Support for Framing, Dependencies and Sharing Without  Restrictions},
+  booktitle    = {{FM}},
+  Xseries       = {Lecture Notes in Computer Science},
+  volume       = {{LNCS 4085}},
+  pages        = {268--283},
+ year = 2006}
+
+@InProceedings{wills91,
+  author =       "Alan Wills",
+  title =        "Capsules and Types in {F}resco",
+  booktitle =    {{ECOOP}},
+  xpublisher =    "Springer-Verlag",
+  month =        jul # " 15-19",
+  year =         "1991"
+}
+
+@PhdThesis{wills92,
+  author =       "Alan Cameron Wills",
+  title =        "Formal Methods applied to Object-Oriented Programming",
+  school =       "University of Manchester",
+  year =         "1992"
+
+}

@@ -15,7 +15,11 @@ lambda calculi, these seem well suited to garbage-collected functional
 languages. Indeed, key features of object-oriented languages have been
 formalised and verified as functional subsets
 \cite{IgaPieWadTOPLAS01}.
- 
+
+
+
+
+
 In this short paper, we describe our attempts to revisit an important
 yet obscure historical contribution to software verification:
 \textit{local stores}. Our presentation here draws heavily upon Mark
@@ -24,7 +28,7 @@ readers eager for more details than we can offer here to consult his
 work \cite{utting1995,utting1998}.  We study local stores in the
 context of Dafny, primarily because Dafny was the verification tool
 with which we had the most experience
-\cite{MPTP,learn2024,flags2024,dafnydala2024}.
+\cite{MPTP,learn2024,flags2024,dafnydala-ftfjp2024}.
 
 The next section describes local stores in more detail, and then we go
 on to consider how local stores could be modelled in Dafny; how they
@@ -33,3 +37,4 @@ introduce our work in progress on using nested local stores to model
 ownership types.  Finally we speculate on how explicit local stores,
 or licit object ownership, could better support generating Rust code
 from Dafny programs.
+

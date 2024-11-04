@@ -1,37 +1,36 @@
 \section{Conclusion}
 %\vspace*{-2mm}
 
+In this short paper we've described our initial experience with
+modelling local stores --- first class regions --- with Dafny.
+Starting from an historical perspective, we've discussed how Utting's
+local store ADT could be modelled in Dafny, albeit not in a way Dafny
+programmers could use such an ADT effectively.
 
-% \begin{verse}
-%   \textit{
-% You think you know when you can learn,\\
-% ~~~~are more sure when you can write,\\
-% ~~~~even more when you can teach,\\
-% ~~~~but certain when you can program.}
-% \end{verse}
-% \vspace*{-10mm}
-% \begin{flushright}
-% ``Epigrams on Programming''\\
-% Alan Perlis~\cite{epigrams}
-% \end{flushright}
+Then, drawing on our work-in-progress models of ownership in
+programming languages \cite{dafnydala-ftfjp2024}, we have shown how
+Dafny's object model can be extended to incorporate local stores into
+object implementations, and how we can use those local stores to
+support reasoning about aliasing.
 
-\vspace*{1mm}
+On the whole we think this effort has been worthwhile (so far): using
+explicit local stores seems no more clumsy than Dafny's native dynamic
+framing, and can be more precise and more flexible than the
+autocontracts mechanism.  Furthermore, by providing programmers with a
+notation to describe nesting relationships between local stores, we
+speculate that information about such relationships may be employable
+e.g.\ to generate better code for Rust or other langauges where object
+lifetimes, nesting, and ownership are important.  On the other hand,
+the lack of reflection in plain Dafny means that the larger prize,
+tighter pelluicid integration of Dafny objects and ownership, would
+require at least compiler plug-ins, or language extensions like linear
+Dafny \cite{linear-dafny-oopsla2022}.
 
-Formal methods and tools are becoming more popular in software engineering practice, and accordingly more common in programming language design.  We have
-described our experience in attempting to increase our assurance in the design of the Dala language,
-by modelling the key parts of Dala's design and then verifying that model in Dafny. 
-
-So far, this approach has been fruitful:  we have been able to model a range of heap constraints in Dafny, and then express and verify that those constraints are maintained. 
-%
-The key factors supporting this outcome were the Dafny tool, which is
-now sufficiently mature to be used at this scale, and the necessary
-time and effort to model the heap structures Dafny (easy), express the invariants and operations permitted on those heaps (relatively easy), and then coax Dafny to admit --- i.e. to satisfy itself, to prove --- that the invariants are maintained (more difficult, but by no means insurmountable).  We hope to continue with this work,
-both to integrate formal verification ever more tightly into programming language design, and to investigate how tools such as Dafny can best support this approach.
-%
-In this sense, using Dafny has increased our confidence in Dala's design: the next steps are to extend the formal model to incorporate a gradual type system, and to 
-implement a concurrent testbed to experiment with writing actual Dala programs.
-
-The main disadvantage we found from using Dafny is that verification always takes longer than any estimate, although when working with Dafny, we often felt that just "one more assertion" would be enough to verify our entire model. We consider this comes from the auto-active / autonomic / opaque style of verification that is intrinsic to Dafny. Dafny verification acts as a intermittent positive reinforcement on a variable ratio schedule, like a slot machine, with the same addictive qualities
+The main disadvantage we found from using Dafny is that verification
+always takes longer than any estimate, although when working with
+Dafny, we often felt that just "one more assertion" would be enough to
+verify our entire model. We consider this comes from the auto-active
+yet opaque style of verification that is intrinsic to Dafny. Dafny verification acts as a intermittent positive reinforcement on a variable ratio schedule, like a slot machine, with the same addictive qualities
 \cite{dafny-europlop2024}.
 
 %% sstudents get feedback

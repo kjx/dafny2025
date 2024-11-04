@@ -1,21 +1,121 @@
 \section{Background}
 
-%stuff ripped from teaching dafny paper..
+\subsection{Local Stores}
 
-% \subsection{Verification}
+Aliasing is endemic in object-oriented programming
+\cite{noble_flexible_1998}, and has long been recognised as a problem,
+both in practice and in theory \cite{geneva91}.
 
-% % \paragraph{Tools for Proram Proof}
-% Formal verification of software systems has been a significant
-% research topic in computer science for 50 years or more~\cite{Jones2021}.  Tools such as Dafny, SAW, SPIN are increasingly
-% mature enough to support industrial application~\cite{Greengard2021,wayne2018temporal} but the main barrier to adoption remains a lack of software
-% engineers trained in their use~\cite{Garavel2020}.
-% Formal methods for describing programming languages arguably have an even older pedigree~\cite{backusALGOL} but as yet, fewer tools have been adopted for their use.
+Mark Utting \cite{utting1995} describes how formal techniques for
+modelling and addressing pointer aliasing were developed by Strachey
+\cite{strachey-varieties-book1997} and Hoare and Wirth
+\cite{hoare-wirth-axiomatic-actainformatica1973}.  Key to this
+approach is to treat all pointer-addressable memory, i.e.\ the heap in
+a language with dynamical memory allocation, as a single large array
+indexed by addresses. This works as far as it goes, but doesn't
+address the ``aliasing problem'', or rather the problem of framing
+computations involving pointers --- every pointer in a program could
+potentially alias any other pointer, so a write through a pointer can
+potentially invalidate every other fact about every other pointer and
+the contents of the entire memory.  This makes most reasoning
+infeasible.
 
-% % Coq
-% % REDEX
-% % IRIS
+In type-safe languages without low-level memory accesses, common
+blocks, etc, dynamic memory can be modelled with an array for each
+type of dynamically allocated objects, rather than one array for the
+whole heap \cite{wirth-pldesign-ifip1974}. This is a measure of
+progress: a pointer invalidates only all other pointers of the same
+type.
 
-% %steal stuff about ownership / strucgured heaps from somehwere else
+Local stores take this design one step further: dividing up memory
+(either within or across classes) into a series of smaller arrays
+(arenas, regions, scopes) under programmer control \cite{utting1995}.
+Local stores thus enable programmers to partition memory to better
+reflect their program's design, so, rather than considering effects on
+all pointers, or all pointers of a given type, any potential effects
+can now be localised to the pointers within a given store.
+
+Within programming language designs, local stores go back at least to
+Wirth's early designs for Pascal \cite{wirth-pascal-1971}.  In
+parallel with standard Pascal's FILE type, which grants
+record-at-a-time access to an unbounded number of instances of a
+subordinate component type, this earlier design had a CLASS type that
+allocated space (presumably on the stack) for a maximum number of
+dynamically allocated instances of a component type. Pointer variables
+indexed a particular class, rather than all dynamically allocated
+instances of a given type.
+
+
+This design was built on in the Euclid language, where ``classes''
+were renamed as ``collections'' \cite{euclid1977}. These collections
+no longer have a fixed size, however in an interesting twist, they may
+specify a maximum reference count for the objects they contain. Note
+that objects in a collection may refer to objects within any other
+colleciton in scope, so reference counting must still be global,
+across all allocated objects.  Euclid collections are responsible for
+the allocation and deallocation of the objects they contain: in this
+sense, they act as stack-allocated \textit{regions} for memory
+allocation \cite{smallmemory}. On the other hand, 
+collections in Euclid are not first class:
+``\textit{A collection may not be assigned to another collection. In
+fact, there is nothing to do with a collection except to subscript it, or to pass it as a var actual
+parameter. A collection type may not be the component type of an array or record or the object
+type of a collection.}''
+\cite{euclid1977}.
+
+
+\subsection{Regions}
+
+Gay and Aiken~\cite{explicitRegions1998} introduced explicit
+regions for managing memory in C-like langauges: objects are
+allocated in regions; and entire regions of objects are deleted in
+one operation, rather than deleting objects individually. A later
+version of this scheme added annotations to indicate that a
+pointer refers to an object in the same region, in an enclosing
+region, or is not allocated via the region
+system~\cite{gay-regions-pldi2001}.
+
+Rather than using explicit, programmer-visible regions, Tofte and
+Talpin~\cite{tofte_region-based_1997, tofte-retrospective-2004}
+demonstrated how Milner-style inference~\cite{baker-unify1990}
+could be extended to implicitly allocate objects to regions, and
+allocate and deallocate those regions, without either explicit
+first-class regions, or additional annotations on programs or
+types. Their MLKit~\cite{mlkit-4.6.0} runs ML programs using stack
+allocation, as the regions are allocated last-in, first-out.
+Because these inferred regions are implicit, the region structure
+cannot capture a programmer's intent about how and where memory
+should be allocated and freed: rather regions will always be inferred
+to conform to the way regions --- or rather pointers --- are used.
+This is in contrast to e.g.\ Euclid collections 
+or Gay and Aitken's regions, where the region structure is described
+explicitly, and programs are statically prevented from using pointers
+in ways that conflict with the region structure.
+MLKit remains under continuous
+development, showing how regions can be supported in a monadic
+style~\cite{fluet-monadic-jfp2006}, and integrating
+generational-style GC within
+regions~\cite{elsman-generational-regions-jfp2021}.
+% \TODO{Note unsoundness bug and reference that paper.}
+
+Safe region allocation was tested in
+Cyclone~\cite{grossman_region-based_2002} an extension of C
+with an explicit region construct, rather than using
+inference. Like the MLKit, Cyclone regions were originally stack
+based; later versions added support for unique pointers and
+reference counted objects to permit deallocation of individual
+objects inside a region, at the cost or introducing memory leaks
+due to cycles or failure to deallocate a dropped unique
+pointer~\cite{cyclone-ismm2004}.
+
+Both MLKit style implicit /
+inferred regions, and Cyclone explicit / annotated regions can be
+modelled by a common core calculus based on linear references to
+explicit, first-class
+regions~\cite{fluet-linear-regions-esop2006}.
+
+
+
 
 \subsection{Ownership and Structured Heaps}
 
@@ -38,31 +138,15 @@ Microsoft~\cite{RustPopular,MSRust}.
 By keeping track of each object's
 ownership, these languages can determine when an object may be used,
 when it may be changed, and the effects those changes can have on the
-rest of the program.
-%
-%
-%% Concurrent programming languages face three problems:
-%% %
-%% \textbf{Correctness}: concurrent threads must only interact with each other
-%% in well understood ways~\cite{MPC-Staden15,concur2007,chalice}.
-%% %
-%% % interference between threads must be prevented.
-%% %
-%% \textbf{Simplicity}: programmers must be able to read, write, and understand
-%% safe, efficient programs~\cite{lea98,stefikConcur2020,godefroid2008}.
-%% %
-%% \textbf{Performance}: 
-%% concurrent programs should run efficiently
-%% (or else why not just write a non-current program~\cite{TeslaRewrite,RustRewrite}).
-%% %
-%
-%
+rest of the program. 
+
+
 While much simpler than full-scale program proof systems, these 
 languages rely on complicated static (compile-time) rules and
 restrictions, with many different capability annotations and ownership
 parameterisations that many programmers often find hard to learn and use
 correctly~\cite{LearnRust,VizRust,HardRust}: they support writing
-correct and efficient programs, but they are still hard to understand
+ correct and efficient programs, but they are still hard to understand
 ~\cite{SafeRust,FightRust} for a number of
 reasons. First, their design must be conservative, banning not just
 all  programs that are \textit{actually} unsafe, but a large
@@ -86,59 +170,27 @@ entertainment system would have to be engineered to the same level of
 quality as a critical flight control system, even though the risks and
 requirements for each system are very different.
 
-\subsection{Dala: a simple concurrent language}
-\label{DALAA}
-% We can combine what we have so far to validate the heap model of Dala, a simple concurrent object-oriented programming language~\cite{Dalarna,Dala},3 based on a novel model of \textit{concurrent dynamic  ownership}~\cite{dynamicOwn,dynamicAlias} tailored to 
-%   ensure that all valid programs are thread-safe  by design (aka data race free, "fearlessly concurrent", etc).  
-
-Dala is a simple concurrent object-oriented language~\cite{Dalarna,dala-onward2021} based on \textit{concurrent dynamic  ownership}~\cite{dynamicOwn,dynamicAlias}.
-Dala is based on dividing objects in programs
-into one of three core \textit{ownership capabilities}:
-%
-%% %% \begin{wrapfigure}{r}{0.26\textwidth}
-%% %% \centering
-%% %% \includegraphics[width=0.25\textwidth]{Safe-Heap.pdf}
-%% %% \Description{Figured showing permitted references: from anything (including immutable) to immutable,  from isolated to isolated (and also to immutable)  from local/mutable to anything (including local/mutable).}
-%% %% \end{wrapfigure}
-%
-\emph{\textbf{Imm}utable} values can be shared freely within and
-between concurrent threads but cannot be updated;
-\emph{\textbf{Iso}lated} objects can be updated and transferred
-between threads but can only have one unique reference; and
-\emph{\textbf{Local}} objects that can be accessed, updated, and
-shared only within a single thread.
-
-In Dala, these capabilities do not stand alone:
-rather they form an ownership hierarchy (\textbf{Imm} $<$ \textbf{Iso}
-$<$ \textbf{Local}) that constrains interobject references:
-an immutable
-object can only refer to other immutable objects; an isolated
-object can refer to other isolated or immutable objects; and a local object
-can refer to immutable objects, isolated objects, and other local
-objects:
-
-\begin{figure}[!h]
-\centering
-%\includegraphics[width=0.25\textwidth]{Safe-Heap.pdf}
-\Description{Figured showing permitted references: from anything (including immutable) to immutable,  from isolated to isolated (and also to immutable)  from local/mutable to anything (including local/mutable).}
-\end{figure}
-
-%
-%
-The hierarchy will be enforced by ownership checks integrated into
-the programming language: unintentional (buggy) or 
-intentional (malicious) attempts to subvert the ownership
-model must be prevented by the language implementation (not the user).
-%
-Enforcing the capability ownership hierarchy will
-ensure concurrent safety via data-race freedom, because
-threads can only communicate by reading immutable objects (which is
-always safe, because immutable objects never change) or by
-transferring isolated objects between threads (which is safe because
-isolated objects can only be accessed by one thread at any given
-instant).
+More recently, language designers from various different traditions
+have experimented with finding ways to make ownership systems easier
+to use, often by relaxing the complex static restrictions required to
+ensure safety at compile-time, by accepting some overhead for dynamic
+checking to restore safety at run-time
+\cite{dafnydala-ftfjp2024,reggio-oopsla2023,gallifrey-pldi2022}
+or by employing more general solvers rather than type checkers to the
+same end \cite{Astrauskas2019,linear-dafny-oopsla2022,prusti}.
 
 
+
+Various varieties of ownership types have been used to support program
+verification. Universe types require that modules own their own
+invariants, so that their state can only be updated by the code within
+the module
+\cite{pubsdoc:universe-types-encapsulation,DietlMueller05,MuellerPoetzsch-HeffterLeavens06}.
+Spec$\sharp$ uses a solver to track a conceptually similar notion of
+ownership, again to track when modifications may invalidate an
+invariant --- a development of an earlier, more dynamic model where
+a solver uses ownership to ensure aggregate objects invariants are
+consistent \cite{verification-oo-invariants-jot2004}.
 
 % dafny stuff (stolen from another paper, ideally should revise!)
 
@@ -149,10 +201,38 @@ first developed at Microsoft Research (MSR)~\cite{microsoftresearch} and  curren
 
 To develop a verified program, developers write Dafny code along with the specifications and annotations to reason about the correctness of their code. While coding in Visual Studio, the Dafny static program verifier instantly verifies the functional correctness based on developers defined specifications and annotations. Correctness means the absence of any runtime errors with respect to the formal specifications, which means that the code does what the developers specify it to do. In order to confirm that the developer  specifications holds, the Dafny program verifier first transforms the code  into an intermediate verification representation (IVR) known as Boogie IVR~\cite{le2011boogie} language that expresses the verification conditions into predicate calculus~\cite{DBLP:journals/software/Leino17}. Next, an SMT solver tries to prove the verification conditions. In this phase, the Dafny verifier is backed by an advanced SMT solver known as the Z3 theorem prover~\cite{Z3-tacas2008}. The validity of these verification conditions implies the correctness of the code under consideration~\cite{DBLP:journals/software/Leino17}. Sometimes, however, the Z3 solver cannot automatically reach the required proof even though such proof exists. In such cases, developer intervention is required to give more context in the specifications by writing auxiliary verification conditions in the form of functions, predicates, and lemmas. 
 
-In recent years, Dafny has had major successes: Microsoft used Dafny to formally verify security libraries and kernels~\cite{DBLP:conf/sosp/KleinEHACDEEKNSTW09,DBLP:journals/sigops/ErbsenPGSC20}, distributed systems~\cite{ironfleet-sosp2015}, and concurrent programs~\cite{DBLP:conf/osdi/HawblitzelHLNPZZ14}; Intel is developing its hardware encryption library using Dafny~\cite{DBLP:journals/iacr/YangWCCY23}; ConsenSys successfully applied Dafny for their Ethereum Virtual Machine (EVM) verification~\cite{cassex-eth-fm2023}; Amazon implemented the Amazon Web Service (AWS) authorization and encryption logic in Dafny and deployed the Dafny-generated Java code into production~\cite{counterexamples-tacas2022}.
+In recent years, Dafny has had major successes: Microsoft used Dafny to formally verify security libraries and kernels~\cite{DBLP:conf/sosp/KleinEHACDEEKNSTW09,DBLP:journals/sigops/ErbsenPGSC20}, distributed systems~\cite{ironfleet-sosp2015}, and concurrent programs~\cite{DBLP:conf/osdi/HawblitzelHLNPZZ14}; Intel is developing its hardware encryption library using Dafny~\cite{DBLP:journals/iacr/YangWCCY23}; ConsenSys successfully applied Dafny for their Ethereum Virtual Machine (EVM) verification~\cite{cassex-eth-fm2023}; Amazon implemented the Amazon Web Service (AWS) authorization and encryption logic in Dafny and deployed the DafSdafnyny-generated Java code into production~\cite{counterexamples-tacas2022}.
+Dafny is under continuous development, and has also served as a
+research tool. Linear Dafny, for example, enhances Dafny with linear
+types \cite{linear-dafny-oopsla2022}.
+
+We can compare Dafny with tools more commonly used to verify
+programming language designs such as REDEX~\cite{PLTRedex} or
+Coq~\cite{coq,coqbook}.  REDEX is a testing and exploration tool:
+designers can express the semantics of a whole language, and test and
+explore those semantics, but REDEX itself does not make a claim to
+formal validation.  On the other hand, as a higher-order
+dependently-typed total functional language, designers can use Coq to
+both specify and prove entire languages --- but constructing such a
+explicit proof can take a large amount of time, and an even larger
+amount of expertise.  Superficially, Dafny's validation claims are
+much weaker than Coq's, as Dafny's implementation (verification
+condition generator, SMT solver) is not itself verified.  While a
+proof in Coq is explicit in the syntax and must be manupiulated by the
+programmer, such a "proof" as Dafny constructs is implicit: users
+write specifications and programs, but it's Dafny's job to validate
+them.
 
 
-We can compare Dafny with tools more commonly used to verify programming language designs such as REDEX~\cite{PLTRedex} or Coq~\cite{coq,coqbook}.  REDEX is a testing and exploration tool: designers can express the semantics of a whole language, and test and explore those semantics, but REDEX itself does not make a claim to formal validation. 
-On the other hand, as a higher-order dependently-typed total functional language, designers can use Coq to both specify and prove entire languages --- but constructing such a explicit proof can take a large amount of time, and an even larger amount of expertise. 
-Superficially, Dafny's validation claims are much weaker than Coq's, as Dafny's implementation (verification condition generator, SMT solver) is not itself verified.  While a proof in Coq is explicit in the syntax and must be manupiulated by the programmer, such a "proof" as Dafny constructs is implicit: users write specifications and programs, but it's Dafny's job to validate them.
-
+Dafny does not use ownership to manage aliasing --- rather it takes
+its name from the theory of ``\textit{dynamic frames}''
+\cite{dynamic-frames-fm2006,dynamic-frames-fac2011}.  A dynamic frame
+--- originally named ``\textit{desmesnes}'' (Norman French, pronounced
+as and cognate to English ``\textit{domain}'') \cite{wills91,wills92}.
+A demesnes or dynamic frame is the set of objects upon which one
+particular object (or its invariant) depends.  Methods making
+modifications must have dynamic frame speciications that cover every
+object that will be modified, and reject programs that attempt
+modifications to objects outside the frame. Similarly, two operations
+or objects whose frames are disjoint, cannot interfere with each
+other.

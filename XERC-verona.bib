@@ -7817,7 +7817,8 @@ Xnumpages = {11}
 @InProceedings{utting1998,
   author = 	 {Mark Utting and James Dunwoody},
   title = 	 {Local Stores in C$++$},
-  booktitle = {Formal Methods Pacific / Australasian Refinement Workshop},
+  booktitle = {Formal Methods Pacific /
+  Australasian Refinement Workshop},
   year = 	 1998}
 
 
@@ -8549,4 +8550,28 @@ month = 	 {Feb},
   month = apr,
   year = 2023,
   note = {HotCRP ID 418}
+}
+
+
+
+
+
+@article{reggio-oopsla2023,
+author = {Arvidsson, Ellen and Castegren, Elias and Clebsch, Sylvan and Drossopoulou, Sophia and Noble, James and Parkinson, Matthew J. and Wrigstad, Tobias},
+title = {Reference Capabilities for Flexible Memory Management},
+year = {2023},
+Xissue_date = {October 2023},
+Xpublisher = {Association for Computing Machinery},
+Xaddress = {New York, NY, USA},
+Xvolume = {7},
+Xnumber = {OOPSLA2},
+Xurl = {https://doi.org/10.1145/3622846},
+doi = {10.1145/3622846},
+Xabstract = {Verona is a concurrent object-oriented programming language that organises all the objects in a program into a forest of isolated regions. Memory is managed locally for each region, so programmers can control a program's memory use by adjusting objects' partition into regions, and by setting each region's memory management strategy. A thread can only mutate (allocate, deallocate) objects within one active region---its "window of mutability". Memory management costs are localised to the active region, ensuring overheads can be predicted and controlled. Moving the mutability window between regions is explicit, so code can be executed wherever it is required, yet programs remain in control of memory use. An ownership type system based on reference capabilities enforces region isolation, controlling aliasing within and between regions, yet supporting objects moving between regions and threads. Data accesses never need expensive atomic operations, and are always thread-safe.},
+Xjournal = {Proc. ACM Program. Lang.},
+journal = {{OOPSLA}},
+month = oct,
+Xarticleno = {270},
+numpages = {31},
+Xkeywords = {type systems, ownership, memory management, isolation}
 }
