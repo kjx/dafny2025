@@ -1,4 +1,4 @@
-\documentclass[sigconf,screen,balance]{acmart}
+\documentclass[sigplan,review,screen,balance]{acmart}
 
 \usepackage{graphicx}
 %\usepackage{times}
@@ -16,17 +16,16 @@
 
 % \citestyle{acmauthoryear}
 
-\copyrightyear{2024}
-\acmYear{2024}
-\setcopyright{acmlicensed}\acmConference[FTfJP '24]{Proceedings of the 26th ACM International Workshop on Formal Techniques for Java-like Programs}{September 20, 2024}{Vienna, Austria}
-\acmBooktitle{Proceedings of the 26th ACM International Workshop on Formal Techniques for Java-like Programs (FTfJP '24), September 20, 2024, Vienna, Austria}
-\acmDOI{10.1145/3678721.3686228}
-\acmISBN{979-8-4007-1111-4/24/09}
+%% \copyrightyear{2024}
+%% \acmYear{2024}
+%% \setcopyright{acmlicensed}\acmConference[FTfJP '24]{Proceedings of the 26th ACM International Workshop on Formal Techniques for Java-like Programs}{September 20, 2024}{Vienna, Austria}
+%% \acmBooktitle{Proceedings of the 26th ACM International Workshop on Formal Techniques for Java-like Programs (FTfJP '24), September 20, 2024, Vienna, Austria}
+%% \acmDOI{10.1145/3678721.3686228}
+%% \acmISBN{979-8-4007-1111-4/24/09}
 
 \begin{document}
 %
-\title{Dafny vs.\ Dala: %\\
-Experience with Mechanising Language Design}
+\title{Local Stores in Dafny}
 %
 \author{James Noble}
 \orcid{0000-0001-9036-5692}             %% \orcid is optional
@@ -104,19 +103,23 @@ Experience with Mechanising Language Design}
 
 %
 \begin{abstract}
-Dala is a design for a concurrent dynamic object-oriented language,
-with the key goal of avoiding data races, by ensuring threads do not share mutable state.
-In this paper we discuss our experience using the program verification tool Dafny to validate Dala's design.
-We explain how we modelled salient features of Dala in Dafny, and how Dafny did (or did not) assist our confidence in Dala's design.
+Local stores are a technique for reasoning about aliasing that goes
+back to Wirth's early designs for Pascal.  Rather than treating the
+heap as one large array, or at best one array for each type of
+dynamically allocated objects, local stores view memory as a series of
+smaller arrays (arenas, regions, scopes) under programmer control.
 
-% Structured Heaps --- topological constraints on programs' memory use, pointers, and references -- have been making their way into mainstream programming languages. Rust is based around Ownership Types, External Uniqueness, and Alias Burying; similar facilities have been proposed for Swift; while venerable C++ has had "move assignments" since 2011.
-% This causes problems for programmers and language designers alike.
-% Programmers need to understand what these constructs mean; while language designers hopefully know what they mean, but also need a way to navigate the design space from which the particular constructs can be selected.
+Local stores thus enable programmers to partition memory to better
+reflect their program's design, so, rather than considering effects on
+all pointers, or all pointers of a given type, any potential effects
+can be localised to the pointers within a given store.
 
-% This paper reports on our experience to date in using the autonomic verification tool Dafny to describe structured heap models, and then to validate those models. Our framework, DAHLIA (Dafny Autonomic Heap Lightweight Invariant Assurance) allows language designers to model heap structures directly, building more structure on top of the existing Dafny heap. Important invariants about those structures can be encoded as Dafny invariants, and permissible operations on the heap encoded as Dafny method and functions.  Meanwhile, the Dafny tool  autonomically (continually, without user input) attempts to verify that the operations maintain the invariants over the heap structures. We call this level of verification "lightweight assurance" because, using Dafny, we do not have to write explicit proofs, edit proof tactics, or manipulate proof objects. 
-
-% We have used DAHLIA to verify a number of simple heap structures, including Rust-style stack allocation and a simple concurrent object-oriented language. While this is still early work, our framework is already able to offer assurance to language designers that their language designs work, and to help programmers understand what those language designs mean. 
-
+Drawing on Mark Utting's work from the late 1990s, we outline how
+local stores can be modelled in Dafny; how they relate to desmesnes,
+regions, and Dafny's dynamic frames, and introduce our work in
+progress on using nested local stores to model ownership types.
+Finally we speculate on how explicit local stores, or licit object
+ownership, could better support generating Rust code from Dafny programs.
 \end{abstract}
 
 \begin{CCSXML}
@@ -142,7 +145,27 @@ We explain how we modelled salient features of Dala in Dafny, and how Dafny did 
 \ccsdesc[500]{Software and its engineering~Object oriented languages}
 \ccsdesc[500]{Software and its engineering~Software verification}
 \ccsdesc[300]{Software and its engineering~Semantics}
-\keywords{Dala, Dafny, Ownership, Uniqueness, Immutability}
+\keywords{Dafny, Local Stores, Regions, Ownership, Uniqueness, Immutability}
+
+\begin{teaserfigure}
+\begin{center}
+\begin{minipage}{0.8\textwidth}
+  {\Large
+  \begin{enumerate}
+  \setcounter{enumi}{2}
+  \item \textbf{The best thing about the best ideas is how often they get rediscovered.}
+    \end{enumerate}}
+  \begin{flushright}
+    James Noble's Laws of Software, N.D. 
+  \end{flushright}
+  \end{minipage}
+  \vspace*{5mm}
+\end{center}
+\end{teaserfigure}
+
+
+
+
 
 \maketitle
 %
@@ -150,8 +173,11 @@ We explain how we modelled salient features of Dala in Dafny, and how Dafny did 
 %
 
 \input{intro}
-\input{bg}
-\input{heaps}
+\input{bg} % local stores
+\input{heaps} % local stores in Dafny
+% desmesnes, regions, dynamic frames
+% nested local stores
+% explicit local stores vs licit ownership
 %\input{loopy}
 %~~~~~\input{discussion}
 
@@ -181,7 +207,8 @@ Thanks to Rustan Leino and James Wilcox,
 % system, to Royce Brown, Christo Muller, and the ECS technical staff
 % for their support with the course automation; 
 to Lindsay Groves, longtime custodian of Formal Methods at VUW,
-to the many anonymous reviewers of slightly worse versions of this paper.
+to longtime collaborators Sophia Drossopoulou \& Susan Eisenbach,
+to the many anonymous reviewers of slightly worse versions of related papers.
 %
 %This work was supported in part by the Royal Society of New Zealand Marsden Fund Grant %VUW1815 and CRP2101 and by gifts from AWS and Agoric. 
 %
