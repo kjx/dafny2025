@@ -1,0 +1,200 @@
+\documentclass[sigconf,screen,balance]{acmart}
+
+\usepackage{graphicx}
+%\usepackage{times}
+\usepackage{listings}
+\usepackage{dafny}
+\usepackage{microtype}
+\usepackage{wrapfig}
+
+\lstset{language=dafny}
+\lstset{morekeywords={const,reveal}}
+
+% \AtBeginDocument{%
+%   \providecommand\BibTeX{{%
+%     Bib\TeX}}}
+
+% \citestyle{acmauthoryear}
+
+\copyrightyear{2024}
+\acmYear{2024}
+\setcopyright{acmlicensed}\acmConference[FTfJP '24]{Proceedings of the 26th ACM International Workshop on Formal Techniques for Java-like Programs}{September 20, 2024}{Vienna, Austria}
+\acmBooktitle{Proceedings of the 26th ACM International Workshop on Formal Techniques for Java-like Programs (FTfJP '24), September 20, 2024, Vienna, Austria}
+\acmDOI{10.1145/3678721.3686228}
+\acmISBN{979-8-4007-1111-4/24/09}
+
+\begin{document}
+%
+\title{Dafny vs.\ Dala: %\\
+Experience with Mechanising Language Design}
+%
+\author{James Noble}
+\orcid{0000-0001-9036-5692}             %% \orcid is optional
+\affiliation{
+  %\position{Position2a}
+  %\department{Department2a}             %% \department is recommended
+  \institution{Creative Research \& Programming}           %% \institution is required
+  \streetaddress{5 Fernlea Ave, Darkest Karori}
+  \city{Wellington}
+  %\state{State2a}
+  \postcode{6012}
+  \country{New Zealand}                   %% \country is recommended
+}
+\additionalaffiliation{
+\institution{Australian National University}
+\city{Canberra}
+\country{Australia}
+}
+\email{kjx@programming.ac.nz}
+
+\author{Julian Mackay}
+\orcid{0000-0003-3098-3901}             %% \orcid is optional
+\affiliation{
+  %\position{Position2a}
+  \department{School of Engineering \& Computer Science}             %% \department is recommended
+  \institution{Victoria University of Wellington}           %% \institution is required
+  %\streetaddress{5 Fernlea Ave, Darkest Karori}
+  \city{Wellington}
+  %\state{State2a}
+%  \postcode{6012}
+  \country{New Zealand}                   %% \country is recommended
+}
+\email{julian.mackay@ecs.vuw.ac.nz}
+
+\author{Tobias Wrigstad}
+\orcid{0000-0002-4269-5408}             %% \orcid is optional
+\affiliation{
+  %\position{Position2a}
+  \department{Department of Information Technology}             %% \department is recommended
+  \institution{Uppsala University}           %% \institution is required
+  %\streetaddress{5 Fernlea Ave, Darkest Karori}
+  \city{Uppsala}
+  %\state{State2a}
+  %\postcode{6012}
+  \country{Sweden}                   %% \country is recommended
+}
+\email{tobias.wrigstad@it.uu.se}
+
+\author{Andrew Fawcet}
+\orcid{0009-0006-0078-7327}             %% \orcid is 
+\affiliation{
+  \department{School of Engineering \& Computer Science}    %% \department is recommended
+  \institution{Victoria University of Wellington}           %% \institution is required
+  %\streetaddress{5 Fernlea Ave, Darkest Karori}
+  \city{Wellington}
+  %\state{State2a}
+  %\postcode{6012}
+  \country{New Zealand}                   %% \country is 
+}
+\email{fawcetandrew@ecs.vuw.ac.nz}
+
+\author{Michael Homer}
+\orcid{0000-0003-0280-6748}             %% \orcid is 
+\affiliation{
+  \department{School of Engineering \& Computer Science}    %% \department is recommended
+  \institution{Victoria University of Wellington}           %% \institution is required
+  %\streetaddress{5 Fernlea Ave, Darkest Karori}
+  \city{Wellington}
+  %\state{State2a}
+  %\postcode{6012}
+  \country{New Zealand}                   %% \country is 
+}
+\email{mwh@ecs.vuw.ac.nz}
+
+
+%
+\begin{abstract}
+Dala is a design for a concurrent dynamic object-oriented language,
+with the key goal of avoiding data races, by ensuring threads do not share mutable state.
+In this paper we discuss our experience using the program verification tool Dafny to validate Dala's design.
+We explain how we modelled salient features of Dala in Dafny, and how Dafny did (or did not) assist our confidence in Dala's design.
+
+% Structured Heaps --- topological constraints on programs' memory use, pointers, and references -- have been making their way into mainstream programming languages. Rust is based around Ownership Types, External Uniqueness, and Alias Burying; similar facilities have been proposed for Swift; while venerable C++ has had "move assignments" since 2011.
+% This causes problems for programmers and language designers alike.
+% Programmers need to understand what these constructs mean; while language designers hopefully know what they mean, but also need a way to navigate the design space from which the particular constructs can be selected.
+
+% This paper reports on our experience to date in using the autonomic verification tool Dafny to describe structured heap models, and then to validate those models. Our framework, DAHLIA (Dafny Autonomic Heap Lightweight Invariant Assurance) allows language designers to model heap structures directly, building more structure on top of the existing Dafny heap. Important invariants about those structures can be encoded as Dafny invariants, and permissible operations on the heap encoded as Dafny method and functions.  Meanwhile, the Dafny tool  autonomically (continually, without user input) attempts to verify that the operations maintain the invariants over the heap structures. We call this level of verification "lightweight assurance" because, using Dafny, we do not have to write explicit proofs, edit proof tactics, or manipulate proof objects. 
+
+% We have used DAHLIA to verify a number of simple heap structures, including Rust-style stack allocation and a simple concurrent object-oriented language. While this is still early work, our framework is already able to offer assurance to language designers that their language designs work, and to help programmers understand what those language designs mean. 
+
+\end{abstract}
+
+\begin{CCSXML}
+<ccs2012>
+   <concept>
+       <concept_id>10011007.10011006.10011008.10011009.10011011</concept_id>
+       <concept_desc>Software and its engineering~Object oriented languages</concept_desc>
+       <concept_significance>500</concept_significance>
+       </concept>
+   <concept>
+       <concept_id>10011007.10010940.10010992.10010998.10010999</concept_id>
+       <concept_desc>Software and its engineering~Software verification</concept_desc>
+       <concept_significance>500</concept_significance>
+       </concept>
+   <concept>
+       <concept_id>10011007.10011006.10011039.10011311</concept_id>
+       <concept_desc>Software and its engineering~Semantics</concept_desc>
+       <concept_significance>300</concept_significance>
+       </concept>
+ </ccs2012>
+\end{CCSXML}
+
+\ccsdesc[500]{Software and its engineering~Object oriented languages}
+\ccsdesc[500]{Software and its engineering~Software verification}
+\ccsdesc[300]{Software and its engineering~Semantics}
+\keywords{Dala, Dafny, Ownership, Uniqueness, Immutability}
+
+\maketitle
+%
+%
+%
+
+\input{intro}
+\input{bg}
+\input{heaps}
+%\input{loopy}
+%~~~~~\input{discussion}
+
+%\vfill\null
+%\columnbreak
+
+%\vspace*{1mm}
+\input{concl}
+
+\balance
+%\pagebreak 
+
+% \section*{Data-Availability Statement}
+
+% Dahlia is under active development.
+% Low quality Dahlia models  have been submitted as additional material.
+% Revised and refactored models will be submitted to ACM's artefact evaluation and archiving.
+
+%\pagebreak
+
+%\vspace*{1mm}
+\begin{acks}
+Thanks to Rustan Leino and James Wilcox, 
+% and our (ex-) colleagues David Streader, Isaac Oscar Gariano, and
+% Miniruwani Samarakoon for all their help with Dafny;
+% to Marco Servetto for the ``marcotron'' weekly question
+% system, to Royce Brown, Christo Muller, and the ECS technical staff
+% for their support with the course automation; 
+to Lindsay Groves, longtime custodian of Formal Methods at VUW,
+to the many anonymous reviewers of slightly worse versions of this paper.
+%
+%This work was supported in part by the Royal Society of New Zealand Marsden Fund Grant %VUW1815 and CRP2101 and by gifts from AWS and Agoric. 
+%
+This work is supported in part by the Royal Society of New Zealand Te Ap\={a}rangi  Marsden Fund Te P\={u}tea Rangahau a Marsden grants VUWU1815 and CRP2101, an Amazon Research Award, and Agoric Inc.
+\end{acks}
+
+\pagebreak
+%\cleardoublepage
+
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{XERC-Case, XEVIL-rw, XEVIL-bibliography, XETC-biblio, XERC-verona, XERC-references, XERC-ecoop21-biblio, Xeelco-refs,  XRusty-Case, Xgrace2022, dafny}
+
+
+%
+\end{document}

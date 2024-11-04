@@ -1,0 +1,211 @@
+\section{Discussion}
+
+
+\textbf{THIS REALLY NEeDS WORK OR TO BE DELETED}
+
+\emph{
+it's from the SWEN324 paper, basically, it tlaks about courses not programming.
+%
+what needs to happen is write some crap in here a bout frameworks \ldots
+%
+can have some reflection on Dafny I guess
+%
+}
+\begin{verbatim}
+TOPICS:
+ 1. evolving a ftamework in Dafny
+    (not currenly using Dafny modules or refinement)
+ 2. 
+ 3. 
+\end{verbatim}
+
+
+
+Mathematics may still be taught via pencil and paper (or \LaTeX) but
+these days teaching programming is impossible without a toolchain: a
+language implementation, a development environment, and the other
+accoutrements students expect.  Our course design teaches verification
+as a specially intense kind of programming (``More programming than
+programming is our motto'' \cite{bladeRunnerFilm}) --- this requires
+a toolchain that is reliable, scalable, and supported enough to cope
+with daily use by hundreds of students.
+%
+Luckily, we found the current versions Dafny were certainly good
+enough for our purposes: we were able to spend the vast majority of
+our efforts in teaching the practices and principles of verification,
+rather than working around problems and bugs in the tools. While we
+encountered roughly one serious bug during each course offering so
+far, the Dafny project team resolved them assiduously.Our overall
+experience with Dafny was very positive. 
+
+Probably the biggest issue we
+encountered was just finding the resources -- notably staff time and
+effort --- to support rapid feedback via automated marking of the
+weekly questions and the assignments. The problem was not so much the
+necessary infrastructure, which is essentially a one-off cost, but the
+advance preparation needed for automated marking of every assignment.
+Basically, marking must be complete before an assignment can be
+released, rendering it no longer possible to write underspecified assignments
+which point students in a general direction, wait until the assignment deadline, and then take as much
+time as necessary \textit{after the students have submitted their work}
+to work out the marks, the desired solutions, or
+even \textit{whether solutions are possible}. All this work must now be completed beforehand.
+
+\vspace*{5mm}
+
+That said, we did strike three more technical issues that could be
+addressed via changes to Dafny's design:
+
+\paragraph{Program Testing:}  We encourage students to start by testing
+their implementations, because it is easier to verify code that is
+correct
+% against specifications that are also correct
+than it is to
+verify incorrect code :-).
+%
+Dafny’s tight integration of proving and programming unfortunately
+means that programs cannot easily be tested until they are fully verified.
+We observed students continually “commenting out” assertions and
+preconditions to be able to test their programs, and then undoing
+those comments to undertake verification. There are four related problems here.
+
+First, Dafny's requirements to prove all memory accesses safe,
+and that all programs terminate, often mean even simple programs
+have to be heavily annotated just to compile.
+A method to swap two array elements will require 
+array reads and writes to be in bounds;
+the obvious (and best practice) solution is
+to define method preconditions which ensure method 
+arguments are in bounds: but now all callers of the
+method must themselves do enough to meet those preconditions. 
+
+Second, while annotations, assumptions, and non-totality declarations etc.\ can be used 
+to remove the need for some of these checks, they still require
+students to annotate their programs explicitly, 
+i.e.\ so students always have to deal with the checks
+even if just to tell Dafny to ignore them!
+
+Third, while Dafny does support command line options to e.g.\ 
+ignore verification and compile and run programs directly,
+verification is an all-or-nothing, static affair: either
+verification is attempted for the whole program, or 
+all specification and verification constructs are ignored.
+
+Fourth (and finally) the options to control verification are buried in
+the command line, and are not surfaced in the Visual Studio Code IDE.
+
+Following the example of
+Gradual Dafny \cite{Figueroa2018} and Gradual Verification 
+\cite{Arlt2014,Bader2018,Wise2020}
+more generally should make testing easier.
+Ideally students would be able to run programs in a “test mode” where
+Dafny checks as many assertions, assumptions, and pre- and postconditions
+as possible dynamically.  Students could then express a series of unit tests as
+Dafny assertions: if the program verifies, well and good; but if not,
+they would still have the option of running the program and using
+print statements or host debuggers to interrogate program state.
+Recent Dafny releases 
+\cite{Dafny3.0.0} 
+now support an 
+\texttt{expect} statement that does Gradual Dafny style dynamic
+checking: implementing this option may be as simple as translating
+Dafny's verification condition as \texttt{expect}s rather than \texttt{assert}s. 
+
+\paragraph{Verification Debugging:}
+Much of the work of verifying Dafny programs involves students
+annotating their code --- adding require and ensure clauses and
+assertions until the verifier has enough information to discharge its
+proof obligations.  Students find this hard because it is not obvious
+what Dafny “knows” at any given program point: which assertions Dafny
+is able to prove, which assertions Dafny is able to refute, and which
+assertions Dafny is unable to answer (i.e. where the prover times
+out). We also observed cases where Dafny is unable to verify an
+assertion because it does not have enough information about variable
+values --— this is particularly prevalent in code where e.g.\ 
+students have forgotten to write method postconditions, or 
+have not realised a particular postcondition is necessary. This
+manifests as Dafny being unable to verify an assertion about a
+method’s return value, and simultaneously unable to verify the
+negation of that same assertion.  Even good students find this
+situation intensely frustrating.  Ideally Dafny would be able to give
+programmers more information about what it knows, e.g.\
+by querying its underlying solver \cite{Christakis2016}.
+
+
+
+
+\paragraph{Mutable Object Structure:}  Dafny is one of the few tools
+that can verify programs built from composite structures of mutable
+objects using class invariants and representation sets.  In practice,
+this requires either explicit definitions of ``\lstinline+Valid+'' and
+``\lstinline+Repr+'' attributes \cite{dafny2020} which are verbose and
+complex, or implicit definitions generated via the
+``\lstinline+autocontracts+'' attribute \cite{leino2013} which are
+concise but opaque.  Few students were able to use either mechanism
+effectively.  Perhaps by building on work verifying Rust programs,
+such as Prusti \cite{Astrauskas2019} and RustBelt \cite{Jung2017}, it
+should be possible to add ownership annotations to fields and
+parameters, to check those annotations as with Rust's borrow checker
+\cite{Markstrum2010,Dietl2011,Klabnik2019} and thus extend the
+implicit definitions already generated by autocontracts.
+
+\vspace*{5mm}
+
+We also encountered a number of pragmatic issues that arose with Dafny, but which appear to be consequences of Dafny's design choices, and as such are less amenable to technical fixes.
+
+\paragraph{Idiosyncrasies:}  Dafny's syntax is sometimes idiosyncratic, which students found hard to follow.  
+To give just one example, here are a method and function to add two numbers:
+\begin{lstlisting}
+method addM (a : int, b : int) returns (c : int) { c := a + b; }
+function method addF (a : int, b : int) : int { a + b }
+\end{lstlisting}
+The syntax for declaring the return values are different
+(\lstinline+returns+ vs \lstinline+:+); the syntax for actually returning the results are different; a final semicolon is mandatory in the method and forbidden in the function. 
+Adding insult to injury, methods and functions then perform very differently in the verifier:
+\begin{lstlisting}[numbers=left,stepnumber=1]
+     var m := addM(x,y);
+     var f := addF(x,y);
+     assert m == x + y;   //Fails to verify
+     assert f == x + y;   //Verifies
+\end{lstlisting}
+Dafny verifies the assertion on line 4, because functions are incorporated into the verification context.
+Dafny fails to verify the assertion on line 3, however,
+because methods are always abstracted by their postconditions,
+and the declaration of \lstinline+addM+ omits postconditions.
+There are reasons for these choices, but they do make the language more difficult to learn.  
+
+\paragraph{Implicit vs.\ Explicit Verification:}  We have described as taking an implicit (aka ``auto-active''  \cite{autoactive2010}) approach to verification. 
+Our students, or Dafny programmers in general, 
+do not construct proofs explicitly, in some verification domain that reflects on the base domain of the program: rather they
+work in an extended programming language domain. 
+That is, students focus on programs, and program verification, but not on the foundations of logic, programming languages, and critically, not on proof.  Our teaching practice 
+builds on this implicit approach: students 
+definitely need an implicit understanding of the 
+underlying formal concepts --- because they
+will be incapable of completing 
+any work without that understanding --- but we present 
+those concepts completely within the programming 
+approach: we don't discuss the semantics 
+of programming languages, weakest preconditions, 
+the kind of inferences Dafny's underlying solver is making,
+let alone how it works.
+We approach software verification in
+the same way that most software engineering courses 
+approach statically-typed languages: students can
+understand the benefits, and use the type systems,
+but could not give a type-theoretic explanation
+for why their programs don't compile.
+
+Arguably the biggest weakness of this implicit approach
+is that it sidesteps the question of proof.
+Dafny does not illustrate proofs of programs
+(other than symbolic dumps designed for debugging Dafny).
+As a result, we do not expose students to formal proofs,
+and in fact students never need to understand what a proof is.
+
+We do teach that Dafny assertions can be used as ``hints'' to the verifier checker; we also show how Dafny (ghost) functions can be used within specifications or assertions to embody lemmas that Dafny cannot find itself.  In the latter part of the course, questions require (ghost) data and methods to model the state of imperative objects. We mention Dafny's \texttt{calc} statement that supports line-by-line reasoning only in passing. 
+
+We consider this a trade-off worth making: the course stays focused on program verification, through a programming lens, 
+and we use the time to allow students to complete more significant examples with more complex verification constructs,
+rather than teaching proof and necessarily working on smaller examples. 
+

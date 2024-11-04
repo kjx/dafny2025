@@ -1,0 +1,158 @@
+\section{Background}
+
+%stuff ripped from teaching dafny paper..
+
+% \subsection{Verification}
+
+% % \paragraph{Tools for Proram Proof}
+% Formal verification of software systems has been a significant
+% research topic in computer science for 50 years or more~\cite{Jones2021}.  Tools such as Dafny, SAW, SPIN are increasingly
+% mature enough to support industrial application~\cite{Greengard2021,wayne2018temporal} but the main barrier to adoption remains a lack of software
+% engineers trained in their use~\cite{Garavel2020}.
+% Formal methods for describing programming languages arguably have an even older pedigree~\cite{backusALGOL} but as yet, fewer tools have been adopted for their use.
+
+% % Coq
+% % REDEX
+% % IRIS
+
+% %steal stuff about ownership / strucgured heaps from somehwere else
+
+\subsection{Ownership and Structured Heaps}
+
+Many 
+contemporary programming languages such as
+Rust~\cite{RustBook}, Pony~\cite{PonyTS},
+Encore~\cite{EncoreTS},
+%Singularity~\cite{Singularity},
+%Deterministic Parallel Java~\cite{DPJ},
+%Safe C\verb+#+~\cite{GordonPPBD12},
+Obsidian~\cite{aldrichObsidianStudy2020}, and
+Verona~\cite{Verona} 
+have demonstrated the efficacy of \textit{static
+  ownership}~\cite{ClaPotNobOOPSLA98,noble_flexible_1998} %%% BoyLeeRinOOPSLA02,ClaPotNobOOPSLA98 
+%and capability systems
+to ensure
+concurrent programs are safe: Rust in particular has been adopted by
+Microsoft~\cite{RustPopular,MSRust}.
+
+By keeping track of each object's
+ownership, these languages can determine when an object may be used,
+when it may be changed, and the effects those changes can have on the
+rest of the program.
+%
+%
+%% Concurrent programming languages face three problems:
+%% %
+%% \textbf{Correctness}: concurrent threads must only interact with each other
+%% in well understood ways~\cite{MPC-Staden15,concur2007,chalice}.
+%% %
+%% % interference between threads must be prevented.
+%% %
+%% \textbf{Simplicity}: programmers must be able to read, write, and understand
+%% safe, efficient programs~\cite{lea98,stefikConcur2020,godefroid2008}.
+%% %
+%% \textbf{Performance}: 
+%% concurrent programs should run efficiently
+%% (or else why not just write a non-current program~\cite{TeslaRewrite,RustRewrite}).
+%% %
+%
+%
+While much simpler than full-scale program proof systems, these 
+languages rely on complicated static (compile-time) rules and
+restrictions, with many different capability annotations and ownership
+parameterisations that many programmers often find hard to learn and use
+correctly~\cite{LearnRust,VizRust,HardRust}: they support writing
+correct and efficient programs, but they are still hard to understand
+~\cite{SafeRust,FightRust} for a number of
+reasons. First, their design must be conservative, banning not just
+all  programs that are \textit{actually} unsafe, but a large
+number of correct programs as well.  To programmers, this
+manifests as a large number of \textit{false positive} errors or
+warnings about problems that will never arise in practice.  For
+example, Rust's version of ownership types~\cite{RustBook} bans even
+such common idioms such as circular or doubly-linked lists.  Second,
+programmers typically have to annotate their programs to give the
+ownership and capability checkers the information they need --- so
+rather than declaring an input stream ``\verb+in+'', programmers need
+to write complex expressions such as ``\verb+in : &mut InStream<'a>+''
+(where ``\verb+&mut+'' indicates that ``\verb+in+'' is a mutable
+reference, ``\verb+InStream+'' indicates that ``\verb+in+'' refers to
+an input stream, and  ``\verb+<'a>+'' is a lifetime (aka ownership)
+parameter indicating the originating scope of the input stream.
+Finally, these ownership annotations are required throughout
+the program,  even if only a small part is actually concurrent, or is
+otherwise likely to cause critical errors --- in Rust, an inflight
+entertainment system would have to be engineered to the same level of
+quality as a critical flight control system, even though the risks and
+requirements for each system are very different.
+
+\subsection{Dala: a simple concurrent language}
+\label{DALAA}
+% We can combine what we have so far to validate the heap model of Dala, a simple concurrent object-oriented programming language~\cite{Dalarna,Dala},3 based on a novel model of \textit{concurrent dynamic  ownership}~\cite{dynamicOwn,dynamicAlias} tailored to 
+%   ensure that all valid programs are thread-safe  by design (aka data race free, "fearlessly concurrent", etc).  
+
+Dala is a simple concurrent object-oriented language~\cite{Dalarna,dala-onward2021} based on \textit{concurrent dynamic  ownership}~\cite{dynamicOwn,dynamicAlias}.
+Dala is based on dividing objects in programs
+into one of three core \textit{ownership capabilities}:
+%
+%% %% \begin{wrapfigure}{r}{0.26\textwidth}
+%% %% \centering
+%% %% \includegraphics[width=0.25\textwidth]{Safe-Heap.pdf}
+%% %% \Description{Figured showing permitted references: from anything (including immutable) to immutable,  from isolated to isolated (and also to immutable)  from local/mutable to anything (including local/mutable).}
+%% %% \end{wrapfigure}
+%
+\emph{\textbf{Imm}utable} values can be shared freely within and
+between concurrent threads but cannot be updated;
+\emph{\textbf{Iso}lated} objects can be updated and transferred
+between threads but can only have one unique reference; and
+\emph{\textbf{Local}} objects that can be accessed, updated, and
+shared only within a single thread.
+
+In Dala, these capabilities do not stand alone:
+rather they form an ownership hierarchy (\textbf{Imm} $<$ \textbf{Iso}
+$<$ \textbf{Local}) that constrains interobject references:
+an immutable
+object can only refer to other immutable objects; an isolated
+object can refer to other isolated or immutable objects; and a local object
+can refer to immutable objects, isolated objects, and other local
+objects:
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=0.25\textwidth]{Safe-Heap.pdf}
+\Description{Figured showing permitted references: from anything (including immutable) to immutable,  from isolated to isolated (and also to immutable)  from local/mutable to anything (including local/mutable).}
+\end{figure}
+
+%
+%
+The hierarchy will be enforced by ownership checks integrated into
+the programming language: unintentional (buggy) or 
+intentional (malicious) attempts to subvert the ownership
+model must be prevented by the language implementation (not the user).
+%
+Enforcing the capability ownership hierarchy will
+ensure concurrent safety via data-race freedom, because
+threads can only communicate by reading immutable objects (which is
+always safe, because immutable objects never change) or by
+transferring isolated objects between threads (which is safe because
+isolated objects can only be accessed by one thread at any given
+instant).
+
+
+
+% dafny stuff (stolen from another paper, ideally should revise!)
+
+\subsection{Dafny}
+Dafny~\cite{dafnytsite} is a verification-aware strongly typed programming language 
+(with local type inference, objects, and algebraic data types)
+first developed at Microsoft Research (MSR)~\cite{microsoftresearch} and  currently supported by the Amazon Automated Reasoning research group~\cite{awsautomatedreasoning}. Dafny's toolchain includes translators for generating executable code in different target languages such as C\#, Java, JavaScript, Go and Python~\cite{dafny-github}. But the distinguishing feature of Dafny is that it supports code verification via design by contract. For that, it follows the framework of Floyd-Hoare-style ~\cite{DBLP:journals/cacm/Hoare69} program verification with preconditions, postconditions, loop invariants and other high-level formal proof synthesis features such as pure functions, predicates, lemmas, and automated proof by induction. Dafny employs explicit dynamic frames to determine which assertions may be invalidated by imperative updates: imperative methods must be annotated \lstinline+writes S+\ldots to gain permission to write to objects in the set \lstinline+S+ (or occasionally, \lstinline+writes S`f+\ldots to write only to field \lstinline+f+ of the objects in\lstinline+S+).
+
+To develop a verified program, developers write Dafny code along with the specifications and annotations to reason about the correctness of their code. While coding in Visual Studio, the Dafny static program verifier instantly verifies the functional correctness based on developers defined specifications and annotations. Correctness means the absence of any runtime errors with respect to the formal specifications, which means that the code does what the developers specify it to do. In order to confirm that the developer  specifications holds, the Dafny program verifier first transforms the code  into an intermediate verification representation (IVR) known as Boogie IVR~\cite{le2011boogie} language that expresses the verification conditions into predicate calculus~\cite{DBLP:journals/software/Leino17}. Next, an SMT solver tries to prove the verification conditions. In this phase, the Dafny verifier is backed by an advanced SMT solver known as the Z3 theorem prover~\cite{Z3-tacas2008}. The validity of these verification conditions implies the correctness of the code under consideration~\cite{DBLP:journals/software/Leino17}. Sometimes, however, the Z3 solver cannot automatically reach the required proof even though such proof exists. In such cases, developer intervention is required to give more context in the specifications by writing auxiliary verification conditions in the form of functions, predicates, and lemmas. 
+
+In recent years, Dafny has had major successes: Microsoft used Dafny to formally verify security libraries and kernels~\cite{DBLP:conf/sosp/KleinEHACDEEKNSTW09,DBLP:journals/sigops/ErbsenPGSC20}, distributed systems~\cite{ironfleet-sosp2015}, and concurrent programs~\cite{DBLP:conf/osdi/HawblitzelHLNPZZ14}; Intel is developing its hardware encryption library using Dafny~\cite{DBLP:journals/iacr/YangWCCY23}; ConsenSys successfully applied Dafny for their Ethereum Virtual Machine (EVM) verification~\cite{cassex-eth-fm2023}; Amazon implemented the Amazon Web Service (AWS) authorization and encryption logic in Dafny and deployed the Dafny-generated Java code into production~\cite{counterexamples-tacas2022}.
+
+
+We can compare Dafny with tools more commonly used to verify programming language designs such as REDEX~\cite{PLTRedex} or Coq~\cite{coq,coqbook}.  REDEX is a testing and exploration tool: designers can express the semantics of a whole language, and test and explore those semantics, but REDEX itself does not make a claim to formal validation. 
+On the other hand, as a higher-order dependently-typed total functional language, designers can use Coq to both specify and prove entire languages --- but constructing such a explicit proof can take a large amount of time, and an even larger amount of expertise. 
+Superficially, Dafny's validation claims are much weaker than Coq's, as Dafny's implementation (verification condition generator, SMT solver) is not itself verified.  While a proof in Coq is explicit in the syntax and must be manupiulated by the programmer, such a "proof" as Dafny constructs is implicit: users write specifications and programs, but it's Dafny's job to validate them.
+

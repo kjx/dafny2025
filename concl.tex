@@ -1,0 +1,58 @@
+\section{Conclusion}
+%\vspace*{-2mm}
+
+
+% \begin{verse}
+%   \textit{
+% You think you know when you can learn,\\
+% ~~~~are more sure when you can write,\\
+% ~~~~even more when you can teach,\\
+% ~~~~but certain when you can program.}
+% \end{verse}
+% \vspace*{-10mm}
+% \begin{flushright}
+% ``Epigrams on Programming''\\
+% Alan Perlis~\cite{epigrams}
+% \end{flushright}
+
+\vspace*{1mm}
+
+Formal methods and tools are becoming more popular in software engineering practice, and accordingly more common in programming language design.  We have
+described our experience in attempting to increase our assurance in the design of the Dala language,
+by modelling the key parts of Dala's design and then verifying that model in Dafny. 
+
+So far, this approach has been fruitful:  we have been able to model a range of heap constraints in Dafny, and then express and verify that those constraints are maintained. 
+%
+The key factors supporting this outcome were the Dafny tool, which is
+now sufficiently mature to be used at this scale, and the necessary
+time and effort to model the heap structures Dafny (easy), express the invariants and operations permitted on those heaps (relatively easy), and then coax Dafny to admit --- i.e. to satisfy itself, to prove --- that the invariants are maintained (more difficult, but by no means insurmountable).  We hope to continue with this work,
+both to integrate formal verification ever more tightly into programming language design, and to investigate how tools such as Dafny can best support this approach.
+%
+In this sense, using Dafny has increased our confidence in Dala's design: the next steps are to extend the formal model to incorporate a gradual type system, and to 
+implement a concurrent testbed to experiment with writing actual Dala programs.
+
+The main disadvantage we found from using Dafny is that verification always takes longer than any estimate, although when working with Dafny, we often felt that just "one more assertion" would be enough to verify our entire model. We consider this comes from the auto-active / autonomic / opaque style of verification that is intrinsic to Dafny. Dafny verification acts as a intermittent positive reinforcement on a variable ratio schedule, like a slot machine, with the same addictive qualities
+\cite{dafny-europlop2024}.
+
+%% sstudents get feedback
+%% expectations are clear
+%% can work local or remotely (COVID)
+%% sthudents always nkow where they are
+%% students can choose how much time and effort to invest
+%% mastery means can demonstrate a ``taste'' of the topic 
+
+
+% \vspace*{-1mm}
+
+% \begin{verse}
+%   \textit{
+% Getting code to work is one thing.\\
+% Proving it does what it's supposed to is something else.\\
+% Convincing Dafny you've proved it does what it's supposed to\\
+% ~~~~is something else entirely.}
+% \end{verse}
+% \vspace*{-10mm}
+% \begin{flushright}
+% ``Motto for a Software Correctness Course''\\
+% Thomas J. ``Tad'' Peckish (attrib.), twitter, Oct 4 2020
+% \end{flushright}

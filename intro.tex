@@ -1,0 +1,44 @@
+\section{Introduction}
+
+Today’s phones and laptops have ten or more processor cores, while datacentres have tens of millions. To use all these cores effectively, programs  have to be concurrent,  with multiple simultaneous threads of execution. Most of today’s concurrent programs, however, are written in low-level languages which provide no correctness guarantees. 
+To address this problem, we have been working on the design of Dala, a simple concurrent object-oriented language~\cite{Dalarna,dala-onward2021}, based on the Grace object-oriented programming language \cite{grace-onward2012}.
+Dala is based on a novel model of \textit{concurrent dynamic  ownership}~\cite{dynamicOwn,dynamicAlias} tailored to 
+ensure that all valid programs are thread-safe  by design (aka data race free, "fearlessly concurrent", "disentangled" etc).  
+We have a design for Dala, prototype implementations based on various different Grace systems, 
+and a \LaTeX\ formal model which we claim ensures data-race freedom \cite{kiko-phd,dala-onward2021}. 
+
+
+% In the last 20 years, formal methods 
+% moved from esoteric research topic~\cite{CoqTute11} to a set of
+% increasingly practical tools  \cite{alloybook,tlabook,spinbook}.
+% This is also the case in programming language design, where formal definitions of operational semantics, type systems, and soundness proofs are \textit{de rigeur} for research languages, but also being applied to languages used in practice  \cite{RustBelt18,djpRust}.
+% During this time, a spectrum of accepted tools and approaches to formal verification have emerged, such as e.g. the Syntatic Approach to Type Soundness 
+%  \cite{wright_syntactic_1994} as embodied in Pierce's "Types and Programming Languages"  \cite{pierce_types_2002}.  Based on typed lambda calculi, these seem well suited to garbage-collected functional languages. Indeed, key features of object-oriented languages have been formalised and verified as functional subsets  \cite{IgaPieWadTOPLAS01}. 
+ 
+In this short paper, we describe our attempts to formalise key features of the design of Dala using the Dafny verification-based programming language~\cite{dafnytsite,Leino2013,dafny2023}.  We have chosen to work with Dafny for the simple reason that Dafny was the verification tool with which we had the most experience \cite{MPTP,learn2024,flags2024}. Compared with some other tools \cite{coq,CompCert,DBLP:journals/cacm/Leroy09}, Dafny is not designed for validating type systems
+\cite{types-dafnyblog2024,typesystems-dafny2024,stability-dafny2024}:
+we hope this project will help to evaluate Dafny in such a task.
+
+The next section introduces Dala and Dafny, and then we present some key features of modelling Dala with Dafny. 
+
+% The Dafny tool  autonomically (continually, without user input) attempts to verify that the operations maintain the invariants over the heap structures. We call this level of verification "lightweight assurance" for two reasons: first, because we only consider constraints on objects in the heap, not type systems or the actual operational semantics of the language, and second, because, using Dafny, we do not have to write explicit proofs, edit proof tactics, or manipulate proof objects. 
+
+
+% %
+% While a functional, syntactic approach works well for classical type systems, generics, subtyping etc, it elides features of imperative, object-oriented, or systems programming languages such as object identity, pointer topology, mutability, and memory allocation and deallocation. It is just these features, however, 
+% that are increasingly critical to a family of emerging languages such as 
+% Rust  \cite{Rust}. 
+% Rust's key features such as Ownership Types  \cite{noble_flexible_1998}, External Uniqueness \cite{ExternalUniqueness}, and Alias Burying  \cite{Boyland01}, are difficult to model in a purely functional approach, without mutation, and without considering heap structures.
+
+% This paper describes our experience in using Dafny "Heap Models" to address these issues, as an adjunct to other specification techniques and verification tools. 
+% Our aim is to help language designers 
+% navigate the design space from which the particular constructs can be selected  \cite{gordon-ecoop2020}, and thus help language imoplementers understand the semantics that they should support. 
+% Our framework, DAHLIA (Dafny Autonomic Heap Lightweight Invariant Assurance) allows language designers to model heap structures directly, building more structure on top of the existing Dafny heap. Important invariants about those structures can be encoded as Dafny invariants, and permissible operations on the heap encoded as Dafny methods and functions. 
+
+% The Dafny tool  autonomically (continually, without user input) attempts to verify that the operations maintain the invariants over the heap structures. We call this level of verification "lightweight assurance" for two reasons: first, because we only consider constraints on objects in the heap, not type systems or the actual operational semantics of the language, and second, because, using Dafny, we do not have to write explicit proofs, edit proof tactics, or manipulate proof objects. 
+% We have used DAHLIA to verify a number of simple heap structures, including Rust-style stack allocation and simple concurrent object-oriented language. 
+
+
+
+
+%% The rest of this paper is as follows:\ldots
