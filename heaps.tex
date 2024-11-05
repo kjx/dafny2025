@@ -114,7 +114,7 @@ then allocate objects with the store, then use those objects.
      }
 \end{lstlisting}
 
-The catch is that, unlike e.g.\ Rust, Euler, Cyclone, or Linear Dafny,
+The catch is that, unlike e.g.\ Rust, Euclid, Cyclone, or Linear Dafny,
 there's no obvious way to constrain the use of the objects allocated
 in the store. Although in the code above, the \lstinline+local+ store
 appears to be scoped within the \lstinline+global+ store, and that
@@ -176,7 +176,7 @@ permitted:
 To gain maximum advantage of local stores, either some kind of
 reflexive access to object's fields would be required, or a Dafny
 plugin could be written to extend the compiler to undertake the
-checks. Again referring back to Euler, a plugin to implement the
+checks. Again referring back to Euclid, a plugin to implement the
 rule that stores may not be components of other stores, and may only
 be passed as var parameters (i.e. only up the stack,  but not returned
 down it should be straightforward. Establishing proof obligations
