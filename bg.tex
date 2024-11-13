@@ -104,7 +104,7 @@ with an explicit region construct, rather than using
 inference. Like the MLKit, Cyclone regions were originally stack
 based; later versions added support for unique pointers and
 reference counted objects to permit deallocation of individual
-objects inside a region, at the cost or introducing memory leaks
+objects inside a region, at the cost of introducing memory leaks
 due to cycles or failure to deallocate a dropped unique
 pointer~\cite{cyclone-ismm2004}.
 
@@ -119,7 +119,7 @@ regions~\cite{fluet-linear-regions-esop2006}.
 
 \subsection{Ownership and Structured Heaps}
 
-Many 
+Some
 contemporary programming languages such as
 Rust~\cite{RustBook}, Pony~\cite{PonyTS},
 Encore~\cite{EncoreTS},
@@ -143,8 +143,8 @@ rest of the program.
 
 While much simpler than full-scale program proof systems, these 
 languages rely on complicated static (compile-time) rules and
-restrictions, with many different capability annotations and ownership
-parameterisations that many programmers often find hard to learn and use
+restrictions, with a range of capability annotations and ownership
+parameterisations that  programmers often find hard to learn and use
 correctly~\cite{LearnRust,VizRust,HardRust}: they support writing
  correct and efficient programs, but they are still hard to understand
 ~\cite{SafeRust,FightRust} for a number of
@@ -154,7 +154,10 @@ number of correct programs as well.  To programmers, this
 manifests as a large number of \textit{false positive} errors or
 warnings about problems that will never arise in practice.  For
 example, Rust's version of ownership types~\cite{RustBook} bans even
-such common idioms such as circular or doubly-linked lists.  Second,
+such common idioms such as circular or doubly-linked lists
+\cite{rusty-ftfjp2022,RustDLL1,RustDLL2,RustDLL3,RustDLL4}.
+%
+Second,
 programmers typically have to annotate their programs to give the
 ownership and capability checkers the information they need --- so
 rather than declaring an input stream ``\verb+in+'', programmers need
@@ -170,18 +173,17 @@ entertainment system would have to be engineered to the same level of
 quality as a critical flight control system, even though the risks and
 requirements for each system are very different.
 
-More recently, language designers from various different traditions
+Language designers from various different traditions
 have experimented with finding ways to make ownership systems easier
 to use, often by relaxing the complex static restrictions required to
 ensure safety at compile-time, by accepting some overhead for dynamic
 checking to restore safety at run-time
 \cite{dafnydala-ftfjp2024,reggio-oopsla2023,gallifrey-pldi2022}
 or by employing more general solvers rather than type checkers to the
-same end \cite{Astrauskas2019,linear-dafny-oopsla2022,prusti}.
+same end \cite{Astrauskas2019,prusti}.
 
 
-
-Various varieties of ownership types have been used to support program
+Object ownership have also been used to support program
 verification. Universe types require that modules own their own
 invariants, so that their state can only be updated by the code within
 the module
@@ -191,6 +193,13 @@ ownership, again to track when modifications may invalidate an
 invariant --- a development of an earlier, more dynamic model where
 a solver uses ownership to ensure aggregate objects invariants are
 consistent \cite{verification-oo-invariants-jot2004}.
+Linear Dafny enhances Dafny with linear types
+supporting stronger ``built in'' aliasing constraints
+\cite{linear-dafny-oopsla2022}.
+while Verus uses Rust's ownership types to support both manual
+verification and automatic proof generation
+\cite{verus-oopsla2023,autoverus-arXiv2024}.
+
 
 % dafny stuff (stolen from another paper, ideally should revise!)
 
@@ -199,12 +208,35 @@ Dafny~\cite{dafnytsite} is a verification-aware strongly typed programming langu
 (with local type inference, objects, and algebraic data types)
 first developed at Microsoft Research (MSR)~\cite{microsoftresearch} and  currently supported by the Amazon Automated Reasoning research group~\cite{awsautomatedreasoning}. Dafny's toolchain includes translators for generating executable code in different target languages such as C\#, Java, JavaScript, Go and Python~\cite{dafny-github}. But the distinguishing feature of Dafny is that it supports code verification via design by contract. For that, it follows the framework of Floyd-Hoare-style ~\cite{DBLP:journals/cacm/Hoare69} program verification with preconditions, postconditions, loop invariants and other high-level formal proof synthesis features such as pure functions, predicates, lemmas, and automated proof by induction. Dafny employs explicit dynamic frames to determine which assertions may be invalidated by imperative updates: imperative methods must be annotated \lstinline+writes S+\ldots to gain permission to write to objects in the set \lstinline+S+ (or occasionally, \lstinline+writes S`f+\ldots to write only to field \lstinline+f+ of the objects in\lstinline+S+).
 
-To develop a verified program, developers write Dafny code along with the specifications and annotations to reason about the correctness of their code. While coding in Visual Studio, the Dafny static program verifier instantly verifies the functional correctness based on developers defined specifications and annotations. Correctness means the absence of any runtime errors with respect to the formal specifications, which means that the code does what the developers specify it to do. In order to confirm that the developer  specifications holds, the Dafny program verifier first transforms the code  into an intermediate verification representation (IVR) known as Boogie IVR~\cite{le2011boogie} language that expresses the verification conditions into predicate calculus~\cite{DBLP:journals/software/Leino17}. Next, an SMT solver tries to prove the verification conditions. In this phase, the Dafny verifier is backed by an advanced SMT solver known as the Z3 theorem prover~\cite{Z3-tacas2008}. The validity of these verification conditions implies the correctness of the code under consideration~\cite{DBLP:journals/software/Leino17}. Sometimes, however, the Z3 solver cannot automatically reach the required proof even though such proof exists. In such cases, developer intervention is required to give more context in the specifications by writing auxiliary verification conditions in the form of functions, predicates, and lemmas. 
+To develop a verified program, developers write Dafny code along with
+the specifications and annotations to reason about the correctness of
+their code. While coding in Visual Studio, the Dafny static program
+verifier instantly verifies the functional correctness based on
+developers defined specifications and annotations. Correctness means
+the absence of any runtime errors with respect to the formal
+specifications, which means that the code does what the developers
+specify it to do. In order to confirm that the developer
+specifications holds, the Dafny program verifier first transforms the
+code into an intermediate verification representation (IVR) known as
+Boogie IVR~\cite{le2011boogie} language that expresses the
+verification conditions into predicate
+calculus~\cite{DBLP:journals/software/Leino17}. Next, an SMT solver
+tries to prove the verification conditions. In this phase, the Dafny
+verifier is backed by an advanced SMT solver known as the Z3 theorem
+prover~\cite{Z3-tacas2008}. The validity of these verification
+conditions implies the correctness of the code under
+consideration~\cite{DBLP:journals/software/Leino17}. Sometimes,
+however, the Z3 solver cannot automatically reach the required proof
+even though such proof exists. In such cases, developer intervention
+is required to give more context in the specifications by writing
+auxiliary verification conditions in the form of Dafny functions,
+predicates, and lemmas.
 
 In recent years, Dafny has had major successes: Microsoft used Dafny to formally verify security libraries and kernels~\cite{DBLP:conf/sosp/KleinEHACDEEKNSTW09,DBLP:journals/sigops/ErbsenPGSC20}, distributed systems~\cite{ironfleet-sosp2015}, and concurrent programs~\cite{DBLP:conf/osdi/HawblitzelHLNPZZ14}; Intel is developing its hardware encryption library using Dafny~\cite{DBLP:journals/iacr/YangWCCY23}; ConsenSys successfully applied Dafny for their Ethereum Virtual Machine (EVM) verification~\cite{cassex-eth-fm2023}; Amazon implemented the Amazon Web Service (AWS) authorization and encryption logic in Dafny and deployed the DafSdafnyny-generated Java code into production~\cite{counterexamples-tacas2022}.
 Dafny is under continuous development, and has also served as a
-research tool. Linear Dafny, for example, enhances Dafny with linear
+research tool.  Linear Dafny, for example, enhances Dafny with linear
 types \cite{linear-dafny-oopsla2022}.
+
 
 We can compare Dafny with tools more commonly used to verify
 programming language designs such as REDEX~\cite{PLTRedex} or
@@ -225,14 +257,17 @@ them.
 
 
 Dafny does not use ownership to manage aliasing --- rather it takes
-its name from the theory of ``\textit{dynamic frames}''
-\cite{dynamic-frames-fm2006,dynamic-frames-fac2011}.  A dynamic frame
---- originally named ``\textit{desmesnes}'' (Norman French, pronounced
-as and cognate to English ``\textit{domain}'') \cite{wills91,wills92}.
-A demesnes or dynamic frame is the set of objects upon which one
-particular object (or its invariant) depends.  Methods making
-modifications must have dynamic frame speciications that cover every
-object that will be modified, and reject programs that attempt
-modifications to objects outside the frame. Similarly, two operations
-or objects whose frames are disjoint, cannot interfere with each
-other.
+its name from the theory of ``\textit{desmesnes}'' or ``\textit{dynamic frames}''.
+The use of ``\textit{desmesnes}'' functions (from Norman French,
+pronounced as and cognate to English ``\textit{domain}'') 
+originated in Fresco, an early verification system for Smalltalk
+programs, developed by Alan Wills \cite{wills91,wills92}.  A object's demesnes
+(or nowadays ``dynamic frame''
+\cite{dynamic-frames-fm2006,dynamic-frames-fac2011})
+is the set of objects upon which one particular
+object (or its invariant) depends.
+Methods making modifications must
+have dynamic frame speciications that cover every object that will be
+modified, and reject programs that attempt modifications to objects
+outside the frame. Two operations or objects whose frames
+are disjoint cannot interfere with each other.

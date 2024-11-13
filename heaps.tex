@@ -17,6 +17,7 @@ map from pointers (\textit{Ptr}) to values (\textit{Val}).
 
 The ADT has five methods:
 \begin{itemize}
+\item \textbf{initially} creates a new empty store
 \item \textbf{add} in a new pointer to value mapping.
 \item \textbf{update} an existing mapping
 \item \textbf{deref}erence a pointer, returning the corresponding
@@ -26,11 +27,11 @@ The ADT has five methods:
 
 We could convert the Z ADT to Dafny quite straightforwardly (see
 Figure~\ref{fig2}) but unfortunately this can't really be used to
-emulate local stores.  To see why, consider the signature of the
-``\textbf{deref}'' method. This returns the dereferenced value of
-``$v$'' --- however Dafny doesn't make it possible to place any
-further restrictions on the use -- the result is no longer tied to the
-local store in any way.
+emulate local stores within Dafny programs.  To see why, consider the
+signature of the ``\textbf{deref}'' method. This returns the
+dereferenced value of ``$v$'' --- however Dafny doesn't make it
+possible to place any further restrictions on the use -- the result is
+no longer tied to the local store in any way.
 
 \begin{figure}[htb]
 \centering
@@ -52,8 +53,8 @@ enough to the store to which they belonged.
 
 The core of our ownership model is the Dafny class \lstinline+Object+
 (note that while \lstinline+object+ is a reserved word in Dafny,
-\lstinline+Object+ is not --- neither is \lstinline+Class+)). We will
-reuse the design of class Object \lstinline+Object+ to model an object
+\lstinline+Object+ is not --- neither is \lstinline+Class+). We will
+reuse the design of class \lstinline+Object+ to model an object
 allocated in a local store. In particular, we have an
 ``\lstinline+owner+'' field in \lstinline+Object+ which holds the
 local store in which the object is allocated -- set up when the Object
@@ -66,7 +67,7 @@ is allocated.
     constructor(oo : Store) 
       ensures  owner  == oo
       { 
-        owner := r; 
+        owner := oo; 
         ...
 \end{lstlisting}
 
@@ -88,13 +89,14 @@ store as some other object.  Consider the following example:
       }
 \end{lstlisting}
 
-\noindent here, the two arguments a and b are in two different local stores 
-they must be two different objects. As a result, if a is modified,
-we can still establish that b is not modified: both postconditions can
-be verified.  Without the precondition saying the owning local stores
-are disjoint, the postcondition ensuring that \lstinline+b.counter+  is
-unchanged even though  \lstinline+a.counter+ most certainly is changed
-could not be verified.
+\noindent here, the two arguments \lstinline+a+ and \lstinline+b+ are
+in two different local stores they must be two different objects. As a
+result, if a is modified, we can still establish that b is not
+modified: both postconditions can be verified.  Without the
+precondition saying the owning local stores are disjoint, the
+postcondition ensuring that \lstinline+b.counter+ is unchanged (even
+though \lstinline+a.counter+ most certainly is changed) could not be
+verified.
 
 The result is not that dissimilar to programming in a
 language with explicit region allocation: we can allocate a store,
@@ -118,7 +120,7 @@ The catch is that, unlike e.g.\ Rust, Euclid, Cyclone, or Linear Dafny,
 there's no obvious way to constrain the use of the objects allocated
 in the store. Although in the code above, the \lstinline+local+ store
 appears to be scoped within the \lstinline+global+ store, and that
-would be the case in Rust, say, our basic Dafny implementation doesn't
+would be the case in Rust, this basic Dafny implementation doesn't
 enforce that constraint.
 
 \subsection{Nested Local Stores}
@@ -131,7 +133,7 @@ There are two issues that must be resolved:
 
 \noindent Establishing the nesting relationship is relatively straightforward: 
 we extend stores to say which other stores they are nested within,
-and provide an API such \lstinline+inside(part, whole)+ that determines
+and provide an API such as \lstinline+inside(part, whole)+ that determines
 if one store is inside another:
 
 \begin{lstlisting}
@@ -163,35 +165,41 @@ own fields:
 \end{lstlisting}
 
 Using this, we can e.g. place constraints on which references are
-permitted:
-
+permitted, e.g.\ where a \lstinline+refOK(from,to)+ predicate
+ensures that the \lstinline+from+ object may references the
+\lstinline+to+ object, typically by ensuring that \lstinline+from+ has
+access to the store containing \lstinline+to+.
 
 \begin{lstlisting}
-    predicate AllOutgoingRefsDala()
+    predicate AllOutgoingReferencesOK()
       reads this`fields
         { forall n <- fields ::
-            DalaRefOK(kind, fields[n].kind) }
+            refOK(this, fields[n]) }
 \end{lstlisting}
 
 To gain maximum advantage of local stores, either some kind of
-reflexive access to object's fields would be required, or a Dafny
+reflexive access to objects' fields would be required, or a Dafny
 plugin could be written to extend the compiler to undertake the
-checks. Again referring back to Euclid, a plugin to implement the
-rule that stores may not be components of other stores, and may only
-be passed as var parameters (i.e. only up the stack,  but not returned
-down it should be straightforward. Establishing proof obligations
-that an object can only be accessed when it's store is in scope
-appears no harder in principle than ensuring that keys must be in a
-Dafny map before they can be accessed. 
-
+checks. Again referring back to Euclid, a plugin that enforces
+the rule that stores may only be passed by reference into calls
+(i.e. only ``up'' towards the top of the stack, but not returned down
+it,
+or alternatively only passed as ``downward funards'' not ``upward
+funargs'' \cite{funarg-sigsam1970,scheme-hosc1998} should be 
+straightforward. Establishing proof obligations that an object can
+only be accessed when its store is in scope appears no harder in
+principle than ensuring that keys must be in a Dafny map before they
+can be accessed.
+ 
 
 \subsection{From Stores to Owners}
 
-Dynamic Frames, like desmesnes before them, require objects e.g. to
+Dynamic Frames, like desmesnes before them, require objects to
 delineate their representations for framing, typically by writing a
-function (desmesnes \cite{wills91} or original dynamic frames
+function, as in desmesnes \cite{wills91} and the original dynamic frames
 \cite{dynamic-frames-fm2006}, or by updating a data structure
-explicitly --- Dafny's \lstinline+Repr+ is a field, not a function.
+explicitly --- Dafny's \lstinline+Repr+ is a field, not a function
+\cite{dafny-automatic-lpar2010,dafny-using-laser2011,dafny2023}.
 For example, a lookup table implemented by two parallel arrays
 would need to set \lstinline+Repr+ explicitly in its constructor:
 
@@ -199,10 +207,10 @@ would need to set \lstinline+Repr+ explicitly in its constructor:
 class Table<Data> {
   ghost var Repr: set<object>
 
-  var keys : array<int>
-  var values : array<Option<Data>>
+  var keys     : array<int>
+  var values   : array<Option<Data>>
 
-  var size : nat
+  var size     : nat
   var capacity : nat
     
   constructor (initial : nat)
@@ -227,7 +235,7 @@ after every method that changes the representation:
 \begin{lstlisting}
 method Expand()
     requires Valid()
-    modifies this`keys, this`values, this`capacity, this`Repr
+    modifies this
     ensures Valid() && fresh(Repr - old(Repr))
     ensures size == old(size)
     ensures capacity == old(capacity) * 2
@@ -241,7 +249,7 @@ method Expand()
 
 
 \noindent In contrast, a desmesnes function would only need to be
-defined once, and could just be called whenever the footprint of the
+defined once, and could be called whenever the footprint of the
 representation needed to be determined:
 
 \begin{lstlisting}
@@ -256,41 +264,43 @@ an object's representation within a local store for that purpose:
 
 \begin{lstlisting}
 class Table<Data> {
-  ghost var Repr: Store
+  ghost var Repr : Store
 
-  var keys : array<int>
-  var values : array<Option<Data>>
+  var keys     : array<int>
+  var values   : array<Option<Data>>
 
-  var size : nat
+  var size     : nat
   var capacity : nat
     
   constructor (initial : nat)
     requires initial > 0
     ensures Valid()
+    ensures fresh(Repr)
     {  
-       const ReprStore := new Store(this);
+       Repr := new Store(this);
       
        capacity := initial;
        new;
-       keys := new array<int>(capacity, ReprStore);
-       values := new Option<Data>(capacity, ReprStore);
+       keys := new array<int>(capacity, Repr);
+       values := new Option<Data>(capacity, Repr);
 
        size := 0;
      }
  
 \end{lstlisting}
 
-\noindent or one step further, providing every object with a store,
+\noindent or going one step further, providing every object with an integral store,
 and allowing types or variables to be annotated, we could arrive at
-something much close to Ownership Types \cite{noble_flexible_1998} or Rust:
+something much close to Ownership Types \cite{noble_flexible_1998} or
+indeed Rust:
 
 \begin{lstlisting}
 class Table<Data> {
-  var {:rep}  keys : array<int>
+  var {:rep}   keys : array<int>
   var {:rep} values : array<Option<Data>>
 
-  var size : nat
-  var capacity : nat
+  var size          : nat
+  var capacity      : nat
     
   constructor (initial : nat)
     requires initial > 0
@@ -298,7 +308,7 @@ class Table<Data> {
     {  
        capacity := initial;
        new;
-       keys := new {:rep} array<int>(capacity);
+       keys   := new {:rep} array<int>(capacity);
        values := new {:rep} Option<Data>(capacity);
 
        size := 0;

@@ -13,7 +13,7 @@ Dafny's object model can be extended to incorporate local stores into
 object implementations, and how we can use those local stores to
 support reasoning about aliasing.
 
-On the whole we think this effort has been worthwhile (so far): using
+On the whole we think this effort has been worthwhile: using
 explicit local stores seems no more clumsy than Dafny's native dynamic
 framing, and can be more precise and more flexible than the
 autocontracts mechanism.  Furthermore, by providing programmers with a
@@ -23,13 +23,14 @@ e.g.\ to generate better code for Rust or other langauges where object
 lifetimes, nesting, and ownership are important.  On the other hand,
 the lack of reflection in plain Dafny means that the larger prize,
 tighter pelluicid integration of Dafny objects and ownership, would
-require at least compiler plug-ins, or language extensions like linear
+require at least compiler plug-ins, or language extensions like Linear
 Dafny \cite{linear-dafny-oopsla2022}.
 
-The main disadvantage we found from using Dafny is that verification
-always takes longer than any estimate, although when working with
+The main disadvantage we found from using Dafny is that programmer
+time to achieve verification always seems to take longer than any
+estimate --- even though when working with 
 Dafny, we often felt that just "one more assertion" would be enough to
-verify our entire model. We consider this comes from the auto-active
+verify our entire model. We consider this comes from the automatic
 yet opaque style of verification that is intrinsic to Dafny. Dafny verification acts as a intermittent positive reinforcement on a variable ratio schedule, like a slot machine, with the same addictive qualities
 \cite{dafny-europlop2024}.
 

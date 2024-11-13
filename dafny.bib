@@ -934,19 +934,18 @@ doi="10.1007/978-3-642-13010-6_4"
 }
 
 @article{verification-oo-invariants-jot2004,
-  author = {<a href="/contents.php?query=Barnett">Mike Barnett</a> and <a href="/contents.php?query=DeLine">Robert DeLine</a> and <a href="/contents.php?query=F\"{a}hndrich">Manuel F\"{a}hndrich</a> and <a href="/contents.php?query=Leino">K. Rustan M. Leino</a> and <a href="/contents.php?query=Schulte">Wolfram Schulte</a>},
+  author = {Mike Barnett and Robert DeLine and Manuel F\"{a}hndrich andK. Rustan M. Leino and Wolfram Schulte},
   title = {Verification of Object-Oriented Programs with Invariants},
   journal = {Journal of Object Technology},
-  volume = {3},
-  number = {6},
-  issn = {1660-1769},
-  year = {2004},
+  volume = 3,
+  number = 6,
+  xissn = {1660-1769},
+  year = 2004,
   month = jun,
-  editor = {<a href="/contents.php?query=Eisenbach">Susan Eisenbach</a> and <a href="/contents.php?query=M\"{u}ller">Peter M\"{u}ller</a> and <a href="/contents.php?query=Poetzsch-Heffter">Arnd Poetzsch-Heffter</a>},
   note = {Workshop on Formal Techniques for Java-like Programs (FTfJP), ECOOP 2003},
   pages = {27-56},
   doi = {10.5381/jot.2004.3.6.a2},
-  url = {http://www.jot.fm/contents/issue_2004_06/article2.html}
+  Xurl = {http://www.jot.fm/contents/issue_2004_06/article2.html}
 }
 
 
@@ -985,3 +984,101 @@ doi="10.1007/978-3-642-13010-6_4"
   year =         "1992"
 
 }
+
+@inproceedings{verus-oopsla2023,
+author = {Lattuada, Andrea and Hance, Travis and Cho, Chanhee and Brun, Matthias and Subasinghe, Isitha and Zhou, Yi and Howell, Jon and Parno, Bryan and Hawblitzel, Chris},
+title = {{Verus:} Verifying {Rust} Programs using Linear Ghost Types},
+year = {2023},
+Xissue_date = {April 2023},
+Xpublisher = {Association for Computing Machinery},
+Xaddress = {New York, NY, USA},
+volume = {7},
+booktitle = {OOPSLA1},
+url = {https://doi.org/10.1145/3586037},
+doi = {10.1145/3586037},
+Xabstract = {The Rust programming language provides a powerful type system that checks linearity and borrowing, allowing code to safely manipulate memory without garbage collection and making Rust ideal for developing low-level, high-assurance systems. For such systems, formal verification can be useful to prove functional correctness properties beyond type safety. This paper presents Verus, an SMT-based tool for formally verifying Rust programs.  
+With Verus, programmers express proofs and specifications using the Rust language, allowing proofs to take advantage of Rust's linear types and borrow checking. We show how this allows proofs to manipulate linearly typed permissions that let Rust code safely manipulate memory, pointers, and concurrent resources. Verus organizes proofs and specifications using a novel mode system that distinguishes specifications, which are not checked for linearity and borrowing, from executable code and proofs, which are checked for linearity and borrowing.  
+We formalize Verus' linearity, borrowing, and modes in a small lambda calculus, for which we prove type safety and termination of specifications and proofs. We demonstrate Verus on a series of examples, including pointer-manipulating code (an xor-based doubly linked list), code with interior mutability, and concurrent code.},
+Xjournal = {Proc. ACM Program. Lang.},
+Xmonth = apr,
+articleno = {85},
+numpages = {30},
+Xkeywords = {Rust, linear types, systems verification}
+}
+
+
+@article{autoverus-arXiv2024,
+  author       = {Chenyuan Yang and
+                  Xuheng Li and
+                  Md Rakib Hossain Misu and
+                  Jianan Yao and
+                  Weidong Cui and
+                  Yeyun Gong and
+                  Chris Hawblitzel and
+                  Shuvendu K. Lahiri and
+                  Jacob R. Lorch and
+                  Shuai Lu and
+                  Fan Yang and
+                  Ziqiao Zhou and
+                  Shan Lu},
+  title        = {{AutoVerus: Automated Proof Generation for Rust Code}},
+  journal      = {CoRR},
+  volume       = {abs/2409.13082},
+  year         = {2024}
+}
+
+@article{funarg-sigsam1970,
+author = {Moses, Joel},
+title = {The function of {FUNCTION} in {LISP} or why the {FUNARG} problem should be called the environment problem},
+year = {1970},
+Xissue_date = {July 1970},
+Xpublisher = {Association for Computing Machinery},
+Xaddress = {New York, NY, USA},
+number = {15},
+Xissn = {0163-5824},
+Xurl = {https://doi.org/10.1145/1093410.1093411},
+doi = {10.1145/1093410.1093411},
+xabstract = {A problem common to many powerful programming languages arises when one has to determine what values to assign to free variables in functions. Different implementational approaches which attempt to solve the problem are considered. The discussion concentrates on LISP implementations and points out why most current LISP systems are not as general as the original LISP 1.5 system. Readers not familiar with LISP should be able to read this paper without difficulty since we have tried to couch the argument in ALGOL-like terms as much as possible.},
+journal = {{SIGSAM Bull.}},
+month = jul,
+pages = {13–27},
+numpages = {15}
+}
+
+
+@Article{scheme-hosc1998,
+  author = 	 {Sussman, G.J. and Steele, G.L.},
+  title = 	 {Scheme: A Interpreter for Extended Lambda Calculus},
+  journal = 	 {Higher-Order and Symbolic Computation},
+  year = 	 1998,
+  volume = 	 11,
+  pages = 	 {405--439},
+  doi = "10.1023/A:1010035624696"
+}
+
+
+
+@inproceedings{dafny-using-laser2011,
+  author       = {Luke Herbert and
+                  K. Rustan M. Leino and
+                  Jose Quaresma},
+  title        = {Using Dafny, an Automatic Program Verifier},
+  booktitle    = {{LASER} Summer School},
+  series       = {Lecture Notes in Computer Science},
+  volume       = {7682},
+  pages        = {156--181},
+  publisher    = {Springer},
+  year         = {2011}
+}
+
+@inproceedings{dafny-automatic-lpar2010,
+  author       = {K. Rustan M. Leino},
+  title        = {Dafny: An Automatic Program Verifier for Functional Correctness},
+  booktitle    = {{LPAR} (Dakar)},
+  series       = {Lecture Notes in Computer Science},
+  volume       = {6355},
+  pages        = {348--370},
+  publisher    = {Springer},
+  year         = {2010}
+}
+
